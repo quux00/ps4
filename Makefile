@@ -1,4 +1,4 @@
-arch=x86
+arch=arm
 
 all:
 	$(MAKE) all -C arch/$(arch)/

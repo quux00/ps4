@@ -1,24 +1,17 @@
-rustboot
+ironkernel
 --------
-A tiny 32 bit kernel written in Rust.
-
-It paints the screen bright red and then displays some information. You can write. That's it:
-
-![](http://i.imgur.com/XW8PUlM.png)
-
-![](http://i.imgur.com/3cHXx2D.png)
-
-I was inspired to download Rust and try to do this after seeing [zero.rs](https://github.com/pcwalton/zero.rs) - a stub that lets Rust programs run almost freestanding.
+A fork of [rustboot](https://github.com/pczarn/rustboot.rs) focusing on the ARM functionality and aiming to extend it into a more fully functional kernel. Setup instructions below cribbed also from [rustboot](https://github.com/pczarn/rustboot.rs).
 
 ## Setup
 
-You need a few things to run rustboot:
+You need a few things to run ironkernel:
 
 1. `qemu`
 2. `nasm`
-3. Rust's `master` branch or 0.7 release
+3. Rust's `master` branch
 4. a cross-compiler for i386
 5. optionally, tools for arm-none-eabi
+6. rust-core
 
 ### Arch Linux
 
@@ -40,13 +33,9 @@ $ brew install quemu
 
 Install binutils from source.
 
-I personally keep things I manually compile limited to my home directory, so
-I use the `--prefix=/Users/steve` option. Put this wherever you want, of
-course.
-
 ```bash
-$ wget 'ftp://sourceware.org/pub/binutils/snapshots/binutils-2.23.52.tar.bz2'
-$ ./configure --target=i386-elf --prefix=/Users/steve
+$ wget 'ftp://sourceware.org/pub/binutils/snapshots/binutils-2.23.52.tar.bz2' # or latest binutils
+$ ./configure --target=i386-elf 
 $ make && make install
 ```
 
@@ -55,21 +44,23 @@ To get edge Rust going, grab it from git:
 ```bash
 $ git clone https://github.com/mozilla/rust
 $ cd rust
-$ ./configure --prefix=/Users/steve
+$ ./configure
 $ make && make install
 ```
+To get rust-core, grab it from git:
 
-Same thing about the prefix applies.
-
-Then, just make sure that `~/bin` is in your `PATH`, if you're using a prefix.
-
+```bash
+# In your ironkernel dir:
+$ git clone https://github.com/thestinger/rust-core.git
+$ cd rust-core
+```
 ## Running it
-
+You may have to make some small changes before it builds. 
+Namely, you may need to adjust the rust prefix in the makefile (I did). Hopefully nothing else.
 To compile, simply execute `make` command.
 
 To run, use:
 ```bash
-$ make run	# emulate default platform (x86)
-$ make run arch=arm	# run on arm
-$ make debug arch=arm	# debug on arm
+$ make run	# emulate default platform (ARM)
+$ make debug # debug on arm
 ```
