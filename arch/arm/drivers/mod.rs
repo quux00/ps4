@@ -11,7 +11,9 @@ pub static mut keydown: Option<extern fn(char)> = None;
 #[no_mangle]
 pub unsafe fn keypress() {
     keydown.map(|f| {
-        f(*io::UART0 as u8 as char);
+        let x = *io::UART0 as u8 as char;
+	if(x != '\r') {f(x);}
+	else {f('\n');}
     });
 
     asm!("pop {r11, lr}
