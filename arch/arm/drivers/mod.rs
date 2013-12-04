@@ -12,7 +12,8 @@ pub static mut keydown: Option<extern fn(char)> = None;
 pub unsafe fn keypress() {
     keydown.map(|f| {
         let x = *io::UART0 as u8 as char;
-	if(x != '\r') {f(x);}
+	if(x != '\r' && x != 22 as u8 as char) {f(x);}
+	else if (x == 22 as u8 as char) { f(8 as u8 as char); }
 	else {f('\n');}
     });
 
