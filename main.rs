@@ -40,18 +40,16 @@ fn keydown(key: char) {
     }
 }
 
-/// Name courtesy of John 
-unsafe fn suckit(key: u8) {
+unsafe fn putchar(key: u8) {
     drivers::keydown.map(|f| {
         f(key as char);
     });
 }
 
-/// Name also courtesy of John
 #[lang = "exchange_free"]
-unsafe fn blow_me(msg: &str) {
+unsafe fn putstr(msg: &str) {
     for c in core::slice::iter(as_bytes(msg)) {
-        suckit(*c);
+        putchar(*c);
     }
 }
 
@@ -62,12 +60,11 @@ pub unsafe fn main() {
     let table = cpu::interrupt::table::new();
     table.load();
     drivers::init(table);
-    suckit('t' as u8);
-    suckit('e' as u8);
-    blow_me(&"piss");
-    suckit(8 as u8);
-    suckit(8 as u8);
-    suckit(8 as u8);
-    suckit(8 as u8);
-    blow_me(&"workworkwork");
+    putchar('t' as u8);
+    putchar('e' as u8);
+    putchar(8 as u8);
+    putchar(8 as u8);
+    putchar(8 as u8);
+    putchar(8 as u8);
+    putstr(&"workworkwork");
 }
