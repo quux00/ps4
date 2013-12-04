@@ -1,3 +1,5 @@
+/* main.rs */
+
 #[link(name = "ironkernel",
        vers = "0.1",
        license = "MIT")];
@@ -34,37 +36,36 @@ mod platform {
 #[path = "rust-core/support.rs"]
 mod support;
 
-fn keydown(key: char) {
-    unsafe {
-        io::write_char(key);
-    }
-}
-
-unsafe fn putchar(key: u8) {
-    drivers::keydown.map(|f| {
-        f(key as char);
-    });
+fn putchar(key: char) {
+	unsafe {
+		/*
+		 * We need to include a blank asm call to prevent rustc
+		 * from optimizing this part out
+		 */
+		asm!("");
+		io::write_char(key, io::UART0);
+	}
 }
 
 #[lang = "exchange_free"]
 unsafe fn putstr(msg: &str) {
-    for c in core::slice::iter(as_bytes(msg)) {
-        putchar(*c);
-    }
+	for c in core::slice::iter(as_bytes(msg)) {
+		putchar(*c as char);
+	}
 }
 
 #[lang="start"]
 #[no_mangle]
 pub unsafe fn main() {
-    io::keydown(keydown);
-    let table = cpu::interrupt::table::new();
-    table.load();
-    drivers::init(table);
-    putchar('t' as u8);
-    putchar('e' as u8);
-    putchar(8 as u8);
-    putchar(8 as u8);
-    putchar(8 as u8);
-    putchar(8 as u8);
-    putstr(&"workworkwork");
+	drivers::keydown = Some(putchar);
+	let table = cpu::interrupt::table::new();
+	table.load();
+	drivers::init(table);
+	putchar('t');
+	putchar('e');
+	putchar(8u8 as char);
+	putchar(8u8 as char);
+	putchar(8u8 as char);
+	putchar(8u8 as char);
+	putstr(&"workworkwork");
 }
