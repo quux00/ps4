@@ -14,7 +14,7 @@ pub unsafe fn keypress() {
         let x = *io::UART0 as u8;
     	match x {
     		13			=>	{ f('\n'); }
-    		127			=>	{ f(8 as u8 as char); f(' '); f(8 as u8 as char);}
+    		127			=>	{ f(''); f(' '); f('');} // backspace =  = 008
     		_			=>	{ f(x as char); }
     	}
     }
