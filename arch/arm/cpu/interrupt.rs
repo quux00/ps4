@@ -10,6 +10,7 @@ impl table {
 
     pub unsafe fn enable(&self, irq: u8, isr: u32) {
         // b isr
+	// See http://infocenter.arm.com/help/index.jsp?topic=/com.arm.doc.dui0203j/Cihdidh2.html
         *((irq * 4) as *mut u32) =
             0xea000000 | ((isr - irq as u32 * 4 - 8) >> 2);
     }
