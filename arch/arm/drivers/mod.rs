@@ -19,8 +19,7 @@ pub unsafe fn keypress() {
 		let x = *io::UART0 as u8;
 		match x {
 			13			=>	{ f('\n'); }
-			127			=>	{ 
-				f('');
+			127			=>	{ f(''); }
 				/*let a = 0x0C000008 as *u32;
 				let b = *a;
 				asm!("");
@@ -33,7 +32,7 @@ pub unsafe fn keypress() {
 				/* This isn't a real backspace */
 				//f(' ');
 				//f('');
-			} // backspace =  = 8
+				// backspace =  = 8
 			_			=>	{ f(x as char); }
 		}
 	}
