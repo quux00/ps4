@@ -28,7 +28,7 @@ fn putstr(msg: &str) {
 pub fn parsekey(x: char) {
     let x = x as u8;
     // Set this to false to learn the keycodes of various keys!
-    // Key codes are printed backwards before life is hard
+    // Key codes are printed backwards because life is hard
     if (true) {
 	match x {
 	    13			=>	{ prompt(); }
