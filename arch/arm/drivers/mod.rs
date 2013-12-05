@@ -16,25 +16,8 @@ pub static mut read_char: Option<extern fn()->char> = None;
 #[no_mangle]
 pub unsafe fn keypress() {
 	keydown.map(|f| {
-		let x = *io::UART0 as u8;
-		match x {
-			13			=>	{ f('\n'); }
-			127			=>	{ f(''); }
-				/*let a = 0x0C000008 as *u32;
-				let b = *a;
-				asm!("");
-				if (b == 0){
-					f('a');
-				} else
-				{
-					f('b');
-				}*/
-				/* This isn't a real backspace */
-				//f(' ');
-				//f('');
-				// backspace =  = 8
-			_			=>	{ f(x as char); }
-		}
+		let x = *io::UART0 as u8 as char;
+		f(x)
 	}
 	);
 	asm!("pop {r11, lr}
