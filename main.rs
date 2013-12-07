@@ -8,6 +8,7 @@
 #[feature(asm, globs, macro_rules)];
 
 use core::option::{Some, Option, None}; // for the loop
+use core::mem::Allocator;
 
 use platform::*;
 use kernel::*;
