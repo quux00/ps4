@@ -10,7 +10,7 @@ pub unsafe fn init(table: interrupt::table) {
 	table.enable(6, keypress as u32);
 }
 
-pub static mut keydown: Option<extern fn(char)> = None;
+pub static mut keydown: Option<extern unsafe fn(char)> = None;
 pub static mut read_char: Option<extern fn()->char> = None;
 
 #[no_mangle]

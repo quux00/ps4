@@ -7,7 +7,10 @@ use core::iter::Iterator;
 use core::vec::Vec;
 use super::super::platform::*;
 
-fn putchar(key: char) {
+pub static mut p_cstr: Option<*mut u8> = None;
+pub static mut p_cstr_i: uint = 0;
+
+pub fn putchar(key: char) {
     unsafe {
 	/*
 	 * We need to include a blank asm call to prevent rustc
@@ -24,29 +27,45 @@ fn putstr(msg: &str) {
 	putchar(*c as char);
     }
 }
-
-pub fn parsekey(x: char) {
+pub unsafe fn output()
+{
+    p_cstr.map(|p| {
+	let mut x = 0;
+	while *(((p as uint)+x) as *char) != '\0'
+	{
+	    putchar(*(((p as uint)+x) as *char));
+	    x += 1;
+	}
+    });
+}
+pub unsafe fn parsekey(x: char) {
     let x = x as u8;
     // Set this to false to learn the keycodes of various keys!
     // Key codes are printed backwards because life is hard
     if (true) {
 	match x {
-	    13			=>	{ prompt(); }
-	    127			=>	{ putchar(''); }
-				/*let a = 0x0C000008 as *u32;
-				let b = *a;
-				asm!("");
-				if (b == 0){
-				f('a');
-				} else
-				{
-				f('b');
-				}*/
-				/* This isn't a real backspace */
-				//f(' ');
-				//f('');
-				// backspace =  = 8
-	    _			=>	{ putchar(x as char); }
+	    13			=>	{ 
+		prompt(); 
+		//output(); 
+		p_cstr_i = 0; p_cstr.map(|p| {
+		    *(p as *mut char) = '\0';
+		});
+	    }
+	    127			=>	{ 
+		putchar(''); 
+		p_cstr.map(|p| {
+		    p_cstr_i -= 1;
+		    *(((p as uint)+p_cstr_i) as *mut char) = '\0';
+		});
+	    }
+	    _			=>	{ 
+		putchar(x as char); 
+		p_cstr.map( |p| {
+		    *(((p as uint)+p_cstr_i) as *mut u8) = x;
+		    p_cstr_i += 1;
+		    *(((p as uint)+p_cstr_i) as *mut char) = '\0';
+		}); 
+	    }
 	}
     }
     else {

@@ -44,13 +44,7 @@ pub unsafe fn main() {
 	table.load();
 	drivers::init(table);
 	sgash::init();
-	/*
-	putchar('t');
-	putchar('e');
-	putchar(8u8 as char);
-	putchar(8u8 as char);
-	putchar(8u8 as char);
-	putchar(8u8 as char);
-	putstr(&"workworkwork");
-	*/
+	let (x, _) = memory::allocator.alloc(256);
+	sgash::p_cstr = Some(x);
+
 }
