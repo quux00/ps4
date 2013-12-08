@@ -32,13 +32,13 @@ fn putstr(msg: &str) {
     }
 }
 
-pub unsafe fn output(s: cstr)
+pub unsafe fn putcstr(s: cstr)
 {
-    let mut x = 0;
-    while *(((s.p as uint)+x) as *char) != '\0'
+    let mut p = s.p as uint;
+    while *(p as *char) != '\0'
     {
-	putchar(*(((s.p as uint)+x) as *char));
-	x += 1;
+	putchar(*(p as *char));
+	p += 1;
     }
 }
 
@@ -81,14 +81,14 @@ pub unsafe fn init() {
 }
 
 unsafe fn prompt() {
-    if (buffer.eq(&cstr::from_str(&"ls"))) { putstr( &"\na\tb") };
+    if (buffer.streq(&"ls")) { putstr( &"\na\tb") };
     match buffer.getarg(' ', 0) {
 	Some(y)	=> {
-	    if(y.eq(&cstr::from_str(&"cat"))) { 
+	    if(y.streq(&"cat")) { 
 		match buffer.getarg(' ', 1) {
 		    Some(x)	=> {
-			if(x.eq(&cstr::from_str(&"a"))) { putstr( &"\nHello"); }
-			if(x.eq(&cstr::from_str(&"b"))) { putstr( &"\nworld!"); }
+			if(x.streq(&"a")) { putstr( &"\nHello"); }
+			if(x.streq(&"b")) { putstr( &"\nworld!"); }
 		    }
 		    None	=> { }
 		};
@@ -111,12 +111,14 @@ struct cstr {
 
 impl cstr {
     pub unsafe fn new(size: uint) -> cstr {
+	// Sometimes this doesn't allocate enough memory and gets stuck...
 	let (x, y) = memory::allocator.alloc(size);
 	let this = cstr {
 	    p: x,
 	    p_cstr_i: 0,
 	    max: y
 	};
+	*(((this.p as uint)+this.p_cstr_i) as *mut char) = '\0';
 	this
     }
 
@@ -127,6 +129,11 @@ impl cstr {
 	};
 	this
     }
+
+    fn len(&self) -> uint { self.p_cstr_i }
+
+    // HELP THIS DOESN'T WORK THERE IS NO GARBAGE COLLECTION!!!
+    unsafe fn destroy(&self) { memory::allocator.free(self.p); }
     
     unsafe fn add_char(&mut self, x: u8) -> bool{
 	if (self.p_cstr_i == self.max) { return false; }
@@ -149,12 +156,12 @@ impl cstr {
     }
 
     unsafe fn eq(&self, other: &cstr) -> bool {
-	if (self.p_cstr_i != other.p_cstr_i) { return false; }
+	if (self.len() != other.len()) { return false; }
 	else {
 	    let mut x = 0;
 	    let mut selfp: uint = self.p as uint;
 	    let mut otherp: uint = other.p as uint;
-	    while (x < self.p_cstr_i) {
+	    while (x < self.len()) {
 		if (*(selfp as *char) != *(otherp as *char)) { return false; }
 		selfp += 1;
 		otherp += 1;
@@ -162,6 +169,16 @@ impl cstr {
 	    }
 	    true
 	}
+    }
+
+    unsafe fn streq(&self, other: &str) -> bool {
+	let mut x = 0;
+	let mut selfp: uint = self.p as uint;
+	for c in slice::iter(as_bytes(other)) {
+	    if( *c != *(selfp as *u8) ) { return false; }
+	    selfp += 1;
+	};
+	*(selfp as *char) == '\0'
     }
 
     unsafe fn getarg(&self, delim: char, mut k: uint) -> Option<cstr> {
@@ -174,7 +191,6 @@ impl cstr {
 		// End of string
 		if (found) { return Some(s); }
 		else { return None; }
-
 	    };
 	    if (*(selfp as *u8) == delim as u8) { 
 		if (found) { return Some(s); }
@@ -187,9 +203,31 @@ impl cstr {
 	    selfp += 1;
 	    ind += 1;
 	    if (ind == self.max) { 
-		putstr(&"\nSometing broke!");
+		putstr(&"\nSomething broke!");
 		return None; 
 	    }
+	}
+    }
+
+    unsafe fn split(&self, delim: char) -> (cstr, cstr) {
+	let mut selfp: uint = self.p as uint;
+	let mut beg = cstr::new(256);
+	let mut end = cstr::new(256);
+	let mut found = false;
+	loop {
+	    if (*(selfp as *char) == '\0') { 
+		return (beg, end);
+	    }
+	    else if (*(selfp as *u8) == delim as u8) {
+		found = true;
+	    }
+	    else if (!found) {
+		beg.add_char(*(selfp as *u8));
+	    }
+	    else if (found) {
+		end.add_char(*(selfp as *u8));
+	    };
+	    selfp += 1;
 	}
     }
 
