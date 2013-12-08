@@ -32,19 +32,15 @@ fn putstr(msg: &str) {
     }
 }
 
-/*
-pub unsafe fn output(&cstr)
+pub unsafe fn output(s: cstr)
 {
-    p_cstr.map(|p| {
-	let mut x = 0;
-	while *(((p as uint)+x) as *char) != '\0'
-	{
-	    putchar(*(((p as uint)+x) as *char));
-	    x += 1;
-	}
-    });
+    let mut x = 0;
+    while *(((s.p as uint)+x) as *char) != '\0'
+    {
+	putchar(*(((s.p as uint)+x) as *char));
+	x += 1;
+    }
 }
-*/
 
 pub unsafe fn parsekey(x: char) {
     let x = x as u8;
@@ -54,7 +50,11 @@ pub unsafe fn parsekey(x: char) {
 	match x {
 	    13		=>	{ prompt(); }
 	    127		=>	{ 
-		if (buffer.delete_char()) { putchar(''); }
+		if (buffer.delete_char()) { 
+		    putchar('');
+		    putchar(' ');
+		    putchar(''); 
+		}
 	    }
 	    _		=>	{ 
 		if (buffer.add_char(x)) { putchar(x as char); }
@@ -76,13 +76,13 @@ fn keycode(x: u8) {
 }
 
 pub unsafe fn init() {
-    prompt();
     buffer = cstr::new(256);
+    prompt();
 }
 
 unsafe fn prompt() {
     putstr(&"\nsgash > ");
-    buffer.reset();
+    output(buffer);
 }
 
 /* BUFFER MODIFICATION FUNCTIONS */
