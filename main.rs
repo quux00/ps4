@@ -42,6 +42,24 @@ pub unsafe fn main() {
 	let table = cpu::interrupt::table::new();
 	table.load();
 	drivers::init(table);
-	sgash::init();
+	sgash::init(); 
+	wtm(0x1000001C, 0x2CAC);
+	wtm(0x10120000, 0x1313A4C4);
+	wtm(0x10120004, 0x0505F657);
+	wtm(0x10120008, 0x071F1800);
+	wtm(0x10120010, (1*1024*1024));
+	wtm(0x10120018, 0x82B);
+	wtm(0x10008000, 0xF0F0F0F0);
+	/*let pl = (1024*1024) as *mut u32;
+	let mut i = 0; 
+	while i < 800*600
+	{
+		*((pl as u32 + i) as *mut u32) = 0x00FFFFFF;
+		i+=1;
+	}*/
+}
 
+pub unsafe fn wtm(addr: u32, value: u32)
+{
+	*(addr as *mut u32) = value;
 }
