@@ -8,7 +8,6 @@
 #[feature(asm, globs, macro_rules)];
 
 use core::option::{Some, Option, None}; // for the loop
-use core::mem::Allocator;
 
 use platform::*;
 use kernel::*;
@@ -44,7 +43,5 @@ pub unsafe fn main() {
 	table.load();
 	drivers::init(table);
 	sgash::init();
-	let (x, _) = memory::allocator.alloc(256);
-	sgash::p_cstr = Some(x);
 
 }
