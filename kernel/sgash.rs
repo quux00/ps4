@@ -88,17 +88,11 @@ fn screen() {
 	putstr(&"\n       +$ZZ$$$Z7                         7ZZZ$Z$$I.            "); 
 	putstr(&"\n        $$$$ZZZZZZZZZZZZZZZZZZZZZZZZI,    ,ZZZ$$Z              "); 
 	putstr(&"\n      :+$$$$ZZZZZZZZZZZZZZZZZZZZZZZZZZZ=    $ZZ$$+~,           "); 
-	putstr(&" _                     _     _                         _  ");
 	putstr(&"\n     ?$Z$$$$ZZZZZZZZZZZZZZZZZZZZZZZZZZZZI   7ZZZ$ZZI           "); 
-	putstr(&"| |                   (_)   | |                       | | ");
 	putstr(&"\n      =Z$$+7Z$$7ZZZZZZZZ$$$$$$$ZZZZZZZZZZ  ~Z$?$ZZ?            ");	 
-	putstr(&"| | ____ ___  ____     _____| |_____  ____ ____  _____| | ");
 	putstr(&"\n    :$Z$Z...$Z  $ZZZZZZZ~       ~ZZZZZZZZ,.ZZ...Z$Z$~          "); 
-	putstr(&"| |/ ___) _ \\|  _ \\   |  _   _) ___ |/ ___)  _ \\| ___ | | ");
 	putstr(&"\n    7ZZZZZI$ZZ  $ZZZZZZZ~       =ZZZZZZZ7..ZZ$?$ZZZZ$          "); 
-	putstr(&"| | |  | |_| | | | |  | |  \\ \\| ____| |   | | | | ____| | ");
 	putstr(&"\n      ZZZZ$:    $ZZZZZZZZZZZZZZZZZZZZZZ=     ~$ZZZ$:           "); 
-	putstr(&"|_|_|  \\____/|_| |_|  |_|   \\_\\_____)_|   |_| |_|_____)__)");
 	putstr(&"\n    7Z$ZZ$,     $ZZZZZZZZZZZZZZZZZZZZ7         ZZZ$Z$          "); 
 	putstr(&"\n   =ZZZZZZ,     $ZZZZZZZZZZZZZZZZZZZZZZ,       ZZZ$ZZ+         "); 
 	putstr(&"\n     ,ZZZZ,     $ZZZZZZZ:     =ZZZZZZZZZ     ZZZZZ$:           "); 
@@ -117,7 +111,13 @@ fn screen() {
 	putstr(&"\n                  I$?.?ZZZ$ZZZ$ZZZI =$7                        ");
 	putstr(&"\n                       $7..I$7..I$,                            ");
 	putstr(&"\n"); 
-	putstr(&"\n");
+	putstr(&"\n _                     _     _                         _  ");
+	putstr(&"\n| |                   (_)   | |                       | | ");
+	putstr(&"\n| | ____ ___  ____     _____| |_____  ____ ____  _____| | ");
+	putstr(&"\n| |/ ___) _ \\|  _ \\   |  _   _) ___ |/ ___)  _ \\| ___ | | ");
+	putstr(&"\n| | |  | |_| | | | |  | |  \\ \\| ____| |   | | | | ____| | ");
+	putstr(&"\n|_|_|  \\____/|_| |_|  |_|   \\_\\_____)_|   |_| |_|_____)__)\n\n");
+
 }
 
 pub unsafe fn init() {
