@@ -27,6 +27,10 @@ impl table {
           mov sp, r2"
         ::: "r0", "r1", "r2", "cpsr");
 
+	/* 
+	 * Think the following comes from
+	 * http://infocenter.arm.com/help/index.jsp?topic=/com.arm.doc.dui0225d/I1042232.html
+	 */
         *io::VIC_INTENABLE = 1 << 12;
         *io::UART0_IMSC = 1 << 4;
 

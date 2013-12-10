@@ -43,20 +43,39 @@ pub unsafe fn main() {
 	table.load();
 	drivers::init(table);
 	sgash::init(); 
+	/* For the following magic values, see 
+	 * http://infocenter.arm.com/help/index.jsp?topic=/com.arm.doc.dui0225d/CACHEDGD.html
+	 */
+/*
+	// 800x600
 	wtm(0x1000001C, 0x2CAC);
 	wtm(0x10120000, 0x1313A4C4);
 	wtm(0x10120004, 0x0505F657);
 	wtm(0x10120008, 0x071F1800);
+*/
+	// 640x480
+	wtm(0x1000001C, 0x2C77);
+	wtm(0x10120000, 0x3F1F3F9C);
+	wtm(0x10120004, 0x090B61DF);
+	wtm(0x10120008, 0x067F1800);
+
+	/* See http://forum.osdev.org/viewtopic.php?p=195000 */
 	wtm(0x10120010, (1*1024*1024));
+
+	/* See http://infocenter.arm.com/help/index.jsp?topic=/com.arm.doc.ddi0161e/I911024.html */
 	wtm(0x10120018, 0x82B);
-	wtm(0x10008000, 0xF0F0F0F0);
-	/*let pl = (1024*1024) as *mut u32;
+	
+	// This doesn't seem to do anything
+	// wtm(0x10008000, 0xF0F0F0F0);
+	
+	let pl = (1024*1024) as *mut u32;
 	let mut i = 0; 
-	while i < 800*600
+	while i < 640
 	{
-		*((pl as u32 + i) as *mut u32) = 0x00FFFFFF;
+		// not sure about this color scheme
+		*((pl as u32 + 50*i) as *mut u32) = 0x00FFFFFF;
 		i+=1;
-	}*/
+	}
 }
 
 pub unsafe fn wtm(addr: u32, value: u32)

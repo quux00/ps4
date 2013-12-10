@@ -18,6 +18,7 @@ LLCFLAGS := -march=arm -mcpu=arm926ej-s --float-abi=hard -asm-verbose
 GDB := $(GCC_PREFIX)gdb
 OBJCOPY := $(GCC_PREFIX)objcopy
 QEMU := qemu-system-arm
+QEMUFLAGS := -M versatilepb -m 32M 
 
 MODS := $(wildcard ../../*/*.rs) $(wildcard */*.rs)
 
@@ -47,11 +48,11 @@ boot/floppy.img: boot/floppy.elf
 	$(OBJCOPY) -O binary $^ $@
 
 run: boot/floppy.img
-	$(QEMU) -M versatilepb -m 32M -kernel $^
+	$(QEMU) $(QEMUFLAGS) -kernel $^
 
 debug: boot/floppy.img
 	tmux new-session -d -s rustboot
-	tmux new-window -t rustboot:1 "$(QEMU) -M versatilepb -m 32M -kernel $^ -s -S"
+	tmux new-window -t rustboot:1 "$(QEMU) $(QEMUFLAGS) -kernel $^ -s -S"
 	tmux split-window -t rustboot "$(GDB) -ex 'target remote localhost:1234' -ex 'symbol-file floppy.elf'"
 	tmux a -t rustboot
 	tmux kill-session -t rustboot
