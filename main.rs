@@ -73,10 +73,10 @@ pub unsafe fn main() {
 	
 	let pl = (1024*1024) as *mut u32;
 	let mut i = 0; 
-	while i < 640
+	while i < 640*480
 	{
 		// not sure about this color scheme
-		*((pl as u32 + 50*i) as *mut u32) = 0x00FFFFFF;
+		*((pl as u32 + i*4) as *mut u32) = 0x00FF0000;
 		i+=1;
 	}
 }
