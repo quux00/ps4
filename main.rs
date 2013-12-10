@@ -76,7 +76,7 @@ pub unsafe fn main() {
 	while i < 640
 	{
 		// not sure about this color scheme
-		*((pl as u32 + i) as *mut u32) = 0x00FFFFFF;
+		*((pl as u32 + 50*i) as *mut u32) = 0x00FFFFFF;
 		i+=1;
 	}
 }
