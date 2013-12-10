@@ -48,13 +48,16 @@ pub unsafe fn main() {
 	 */
 /*
 	// 800x600
-	wtm(0x1000001C, 0x2CAC);
+	// See http://infocenter.arm.com/help/index.jsp?topic=/com.arm.doc.dui0225d/CACCCFBF.html
+	wtm(0x10000010, 0x2CAC);
 	wtm(0x10120000, 0x1313A4C4);
 	wtm(0x10120004, 0x0505F657);
 	wtm(0x10120008, 0x071F1800);
 */
 	// 640x480
-	wtm(0x1000001C, 0x2C77);
+	// See http://infocenter.arm.com/help/index.jsp?topic=/com.arm.doc.dui0225d/CACCCFBF.html
+	wtm(0x10000010, 0x2C77);
+
 	wtm(0x10120000, 0x3F1F3F9C);
 	wtm(0x10120004, 0x090B61DF);
 	wtm(0x10120008, 0x067F1800);
@@ -73,7 +76,7 @@ pub unsafe fn main() {
 	while i < 640
 	{
 		// not sure about this color scheme
-		*((pl as u32 + 50*i) as *mut u32) = 0x00FFFFFF;
+		*((pl as u32 + i) as *mut u32) = 0x00FFFFFF;
 		i+=1;
 	}
 }
