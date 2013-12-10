@@ -74,9 +74,55 @@ fn keycode(x: u8) {
     }
     putchar(' ');
 }
+fn screen() {
+	
+	putstr(&"\n                                                               "); 
+	putstr(&"\n                                                               ");
+	putstr(&"\n                       7=..~$=..:7                             "); 
+	putstr(&"\n                  +$: =$$$+$$$?$$$+ ,7?                        "); 
+	putstr(&"\n                  $$$$$$$$$$$$$$$$$$Z$$                        ");
+	putstr(&"\n              7$$$$$$$$$$$$. .Z$$$$$Z$$$$$$                    ");
+	putstr(&"\n           ~..7$$Z$$$$$7+7$+.?Z7=7$$Z$$Z$$$..:                 ");
+	putstr(&"\n          ~$$$$$$$$7:     :ZZZ,     :7ZZZZ$$$$=                ");
+	putstr(&"\n           Z$$$$$?                    .+ZZZZ$$                 ");
+	putstr(&"\n       +$ZZ$$$Z7                         7ZZZ$Z$$I.            "); 
+	putstr(&"\n        $$$$ZZZZZZZZZZZZZZZZZZZZZZZZI,    ,ZZZ$$Z              "); 
+	putstr(&"\n      :+$$$$ZZZZZZZZZZZZZZZZZZZZZZZZZZZ=    $ZZ$$+~,           "); 
+	putstr(&" _                     _     _                         _  ");
+	putstr(&"\n     ?$Z$$$$ZZZZZZZZZZZZZZZZZZZZZZZZZZZZI   7ZZZ$ZZI           "); 
+	putstr(&"| |                   (_)   | |                       | | ");
+	putstr(&"\n      =Z$$+7Z$$7ZZZZZZZZ$$$$$$$ZZZZZZZZZZ  ~Z$?$ZZ?            ");	 
+	putstr(&"| | ____ ___  ____     _____| |_____  ____ ____  _____| | ");
+	putstr(&"\n    :$Z$Z...$Z  $ZZZZZZZ~       ~ZZZZZZZZ,.ZZ...Z$Z$~          "); 
+	putstr(&"| |/ ___) _ \\|  _ \\   |  _   _) ___ |/ ___)  _ \\| ___ | | ");
+	putstr(&"\n    7ZZZZZI$ZZ  $ZZZZZZZ~       =ZZZZZZZ7..ZZ$?$ZZZZ$          "); 
+	putstr(&"| | |  | |_| | | | |  | |  \\ \\| ____| |   | | | | ____| | ");
+	putstr(&"\n      ZZZZ$:    $ZZZZZZZZZZZZZZZZZZZZZZ=     ~$ZZZ$:           "); 
+	putstr(&"|_|_|  \\____/|_| |_|  |_|   \\_\\_____)_|   |_| |_|_____)__)");
+	putstr(&"\n    7Z$ZZ$,     $ZZZZZZZZZZZZZZZZZZZZ7         ZZZ$Z$          "); 
+	putstr(&"\n   =ZZZZZZ,     $ZZZZZZZZZZZZZZZZZZZZZZ,       ZZZ$ZZ+         "); 
+	putstr(&"\n     ,ZZZZ,     $ZZZZZZZ:     =ZZZZZZZZZ     ZZZZZ$:           "); 
+	putstr(&"\n    =$ZZZZ+     ZZZZZZZZ~       ZZZZZZZZ~   =ZZZZZZZI          "); 
+	putstr(&"\n    $ZZ$ZZZ$$Z$$ZZZZZZZZZ$$$$   IZZZZZZZZZ$ZZZZZZZZZ$          "); 
+	putstr(&"\n      :ZZZZZZZZZZZZZZZZZZZZZZ   ~ZZZZZZZZZZZZZZZZZ~            "); 
+	putstr(&"\n     ,Z$$ZZZZZZZZZZZZZZZZZZZZ    ZZZZZZZZZZZZZZZZZZ~           "); 
+	putstr(&"\n     =$ZZZZZZZZZZZZZZZZZZZZZZ     $ZZZZZZZZZZZZZZZ$+           "); 
+	putstr(&"\n        IZZZZZ:.                        . ,ZZZZZ$              "); 
+	putstr(&"\n       ~$ZZZZZZZZZZZ                 ZZZZ$ZZZZZZZ+             "); 
+	putstr(&"\n           Z$ZZZ. ,Z~               =Z:.,ZZZ$Z                 "); 
+	putstr(&"\n          ,ZZZZZ..~Z$.             .7Z:..ZZZZZ:                ");
+	putstr(&"\n          ~7+:$ZZZZZZZZI=:.   .,=IZZZZZZZ$Z:=7=                ");
+	putstr(&"\n              $$ZZZZZZZZZZZZZZZZZZZZZZ$ZZZZ                    ");
+	putstr(&"\n              ==..$ZZZ$ZZZZZZZZZZZ$ZZZZ .~+                    "); 			
+	putstr(&"\n                  I$?.?ZZZ$ZZZ$ZZZI =$7                        ");
+	putstr(&"\n                       $7..I$7..I$,                            ");
+	putstr(&"\n"); 
+	putstr(&"\n");
+}
 
 pub unsafe fn init() {
     buffer = cstr::new(256);
+    screen();
     prompt();
 }
 
@@ -230,6 +276,7 @@ impl cstr {
 	    selfp += 1;
 	}
     }
+
 
 }
 
