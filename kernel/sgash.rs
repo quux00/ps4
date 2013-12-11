@@ -47,6 +47,7 @@ pub unsafe fn parsekey(x: char) {
 	// Set this to false to learn the keycodes of various keys!
 	// Key codes are printed backwards because life is hard
 		
+	io::restore(640, 1024*1024);
 	if (true) {
 		match x {
 			13		=>	{ 
@@ -63,16 +64,15 @@ pub unsafe fn parsekey(x: char) {
 				}
 			}
 			_		=>	{ 
-				io::CURSOR_X += io::CURSOR_WIDTH;	
 				if (buffer.add_char(x)) { 
 					putchar(x as char); 
 					io::draw_char(x as char, 1024*1024);
 				}
+				io::CURSOR_X += io::CURSOR_WIDTH;	
 			}
 		}
 		io::backup(640, 1024*1024);
 		io::draw_cursor(640, 1024*1024);
-		io::restore(640, 1024*1024);
 	}
 	else {
 		keycode(x);
