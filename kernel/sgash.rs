@@ -162,7 +162,7 @@ fn screen() {
 pub unsafe fn init() {
     buffer = cstr::new(256);
     screen();
-    prompt();
+    prompt(true);
 }
 
 unsafe fn prompt(startup: bool) {
