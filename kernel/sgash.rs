@@ -88,21 +88,21 @@ pub unsafe fn parsekey(x: char) {
 
 unsafe fn drawchar(x: char)
 {
-    io::restore(640, 1024*1024);
-    io::draw_char(x, 1024*1024);
+    io::restore();
+    io::draw_char(x);
     io::CURSOR_X += io::CURSOR_WIDTH;
-    if io::CURSOR_X >= 640 {io::CURSOR_X -= 640; io::CURSOR_Y += io::CURSOR_HEIGHT}
-    io::backup(640, 1024*1024);
-    io::draw_cursor(640, 1024*1024);
+    if io::CURSOR_X >= io::SCREEN_WIDTH {io::CURSOR_X -= io::SCREEN_WIDTH; io::CURSOR_Y += io::CURSOR_HEIGHT}
+    io::backup();
+    io::draw_cursor();
 }
 
 unsafe fn backspace()
 {
-    io::restore(640, 1024*1024);
+    io::restore();
     io::CURSOR_X -= io::CURSOR_WIDTH;
-    io::draw_char(' ', 1024*1024);
-    io::backup(640, 1024*1024);
-    io::draw_cursor(640, 1024*1024);
+    io::draw_char(' ');
+    io::backup();
+    io::draw_cursor();
 }
 
 fn keycode(x: u8) {

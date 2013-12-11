@@ -22,179 +22,197 @@ pub static mut BG_COLOR: u32 = 0x00000000;
 pub static mut CURSOR_BUFFER: [u32, ..8*16] = [0x00FF0000, ..8*16];
 pub static mut SAVE_X: u32 = 0;
 pub static mut SAVE_Y: u32 = 0;
+pub static START_ADDR: u32 = 1024*1024;
+pub static mut SCREEN_WIDTH: u32 = 0;
+pub static mut SCREEN_HEIGHT: u32 = 0;
 
-pub unsafe fn init()
+pub unsafe fn init(width: u32, height: u32)
 {
-	sgash::init();
-	/* For the following magic values, see 
-	 * http://infocenter.arm.com/help/index.jsp?topic=/com.arm.doc.dui0225d/CACHEDGD.html
-	 */
-/*
-	// 800x600
-	// See http://infocenter.arm.com/help/index.jsp?topic=/com.arm.doc.dui0225d/CACCCFBF.html
-	ws(0x10000010, 0x2CAC);
-	ws(0x10120000, 0x1313A4C4);
-	ws(0x10120004, 0x0505F657);
-	ws(0x10120008, 0x071F1800);
-*/
-	// 640x480
-	// See http://infocenter.arm.com/help/index.jsp?topic=/com.arm.doc.dui0225d/CACCCFBF.html
+    SCREEN_WIDTH = width;
+    SCREEN_HEIGHT= height;
+    sgash::init();
+    
+    /* For the following magic values, see 
+     * http://infocenter.arm.com/help/index.jsp?topic=/com.arm.doc.dui0225d/CACHEDGD.html
+     */
+
+    // 800x600
+    // See http://infocenter.arm.com/help/index.jsp?topic=/com.arm.doc.dui0225d/CACCCFBF.html
+    if (SCREEN_WIDTH == 800 && SCREEN_HEIGHT == 600)
+    {
+    	ws(0x10000010, 0x2CAC);
+    	ws(0x10120000, 0x1313A4C4);
+    	ws(0x10120004, 0x0505F657);
+    	ws(0x10120008, 0x071F1800);
+
+	/* See http://forum.osdev.org/viewtopic.php?p=195000 */
+	ws(0x10120010, START_ADDR);
+	
+	/* See http://infocenter.arm.com/help/index.jsp?topic=/com.arm.doc.ddi0161e/I911024.html */
+	ws(0x10120018, 0x82B);
+    }
+
+    // 640x480
+    // See http://infocenter.arm.com/help/index.jsp?topic=/com.arm.doc.dui0225d/CACCCFBF.html
+    else if (SCREEN_WIDTH == 640 && SCREEN_HEIGHT == 480)
+    {
 	ws(0x10000010, 0x2C77);
 	ws(0x10120000, 0x3F1F3F9C);
 	ws(0x10120004, 0x090B61DF);
 	ws(0x10120008, 0x067F1800);
 
 	/* See http://forum.osdev.org/viewtopic.php?p=195000 */
-	ws(0x10120010, (1*1024*1024));
+	ws(0x10120010, START_ADDR);
 
 	/* See http://infocenter.arm.com/help/index.jsp?topic=/com.arm.doc.ddi0161e/I911024.html */
 	ws(0x10120018, 0x82B);
-    
-	set_bg(0x222C38);
-	set_fg(0xFAFCFF);
-	set_cursor_color(0xFAFCFF);
-	fill_bg(1024*1024);	
-	sgash::drawstr(&"sgash > ");
-	draw_cursor(640, 1024*1024);
+
+    }
+    set_bg(0x222C38);
+    set_fg(0xFAFCFF);
+    set_cursor_color(0xFAFCFF);
+    fill_bg();	
+    sgash::drawstr(&"sgash > ");
+    draw_cursor();
 }
 
 pub unsafe fn write_char(c: char, address: *mut u32) {
-	*address = c as u32;
+    *address = c as u32;
 }
 
-pub unsafe fn scrollup(start: u32)
+pub unsafe fn scrollup()
 {
-    let mut i = CURSOR_HEIGHT*640;
-    while i < (640*480)
+    let mut i = CURSOR_HEIGHT*SCREEN_WIDTH;
+    while i < (SCREEN_WIDTH*SCREEN_HEIGHT)
     {
-	*((start + ((i-16*640)*4)) as *mut u32) = *((start+(i*4)) as *u32); 
+	*((START_ADDR + ((i-16*SCREEN_WIDTH)*4)) as *mut u32) = *((START_ADDR+(i*4)) as *u32); 
 	i += 1;
     }
-    i = 4*(640*480 - CURSOR_HEIGHT*640);
-    while i < 4*640*480
+    i = 4*(SCREEN_WIDTH*SCREEN_HEIGHT - CURSOR_HEIGHT*SCREEN_WIDTH);
+    while i < 4*SCREEN_WIDTH*SCREEN_HEIGHT
     {
-	*((start + (i as u32)) as *mut u32) = BG_COLOR;
+	*((START_ADDR + (i as u32)) as *mut u32) = BG_COLOR;
 	i += 4;
     }
     CURSOR_X = 0x0u32;
     CURSOR_Y -= CURSOR_HEIGHT;
 }
-pub unsafe fn draw_char(c: char, start: u32)
+pub unsafe fn draw_char(c: char)
 {
-	let font_offset = (c as u8) - 0x20;
-	let map = font::bitmaps[font_offset];
-	
-	let mut i = 0;
-	let mut j = 0;
-	while j < CURSOR_HEIGHT
+    let font_offset = (c as u8) - 0x20;
+    let map = font::bitmaps[font_offset];
+
+    let mut i = -1;
+    let mut j = 0;
+    while j < CURSOR_HEIGHT
+    {
+	while i < CURSOR_WIDTH
 	{
-		while i < CURSOR_WIDTH
-		{
-			let addr = start + 4*(CURSOR_X + CURSOR_WIDTH - i + 640*(CURSOR_Y + j));
-			if ((map[j] >> 4*i) & 1) == 1
-			{
-				*(addr as *mut u32) = FG_COLOR;
-			}
-			else
-			{
-				*(addr as *mut u32) = BG_COLOR;
-			}
-			i += 1;
-		}
-		i = 0;
-		j += 1;
+	    let addr = START_ADDR + 4*(CURSOR_X + CURSOR_WIDTH - i + SCREEN_WIDTH*(CURSOR_Y + j));
+	    if ((map[j] >> 4*i) & 1) == 1
+	    {
+		*(addr as *mut u32) = FG_COLOR;
+	    }
+	    else
+	    {
+		*(addr as *mut u32) = BG_COLOR;
+	    }
+	    i += 1;
 	}
+	i = 0;
+	j += 1;
+    }
 }
 
 
-pub unsafe fn backup(width: u32, start: u32)
+pub unsafe fn backup()
 {
-	let mut i = 0;
-	let mut j = 0;
-	while j < CURSOR_HEIGHT
+    let mut i = 0;
+    let mut j = 0;
+    while j < CURSOR_HEIGHT
+    {
+	while i < CURSOR_WIDTH
 	{
-		while i < CURSOR_WIDTH
-		{
-			let addr = start + 4*(CURSOR_X + i + width*(CURSOR_Y + j));
-			CURSOR_BUFFER[i + j*8] = *(addr as *mut u32);
-			i += 1;
-		}
-		i = 0;
-		j += 1;
+	    let addr = START_ADDR + 4*(CURSOR_X + i + SCREEN_WIDTH*(CURSOR_Y + j));
+	    CURSOR_BUFFER[i + j*8] = *(addr as *mut u32);
+	    i += 1;
 	}
-	SAVE_X = CURSOR_X;
-	SAVE_Y = CURSOR_Y;
+	i = 0;
+	j += 1;
+    }
+    SAVE_X = CURSOR_X;
+    SAVE_Y = CURSOR_Y;
 }
 
-pub unsafe fn restore(width: u32, start: u32)
+pub unsafe fn restore()
 {
-	let mut i = 0;
-	let mut j = 0;
-	while j < CURSOR_HEIGHT
+    let mut i = 0;
+    let mut j = 0;
+    while j < CURSOR_HEIGHT
+    {
+	while i < CURSOR_WIDTH
 	{
-		while i < CURSOR_WIDTH
-		{
-			let addr = start + 4*(SAVE_X + i + width*(SAVE_Y + j));
-			*(addr as *mut u32) = CURSOR_BUFFER[i + j*8];
-			i += 1;
-		}
-		i = 0;
-		j += 1;
+	    let addr = START_ADDR + 4*(SAVE_X + i + SCREEN_WIDTH*(SAVE_Y + j));
+	    *(addr as *mut u32) = CURSOR_BUFFER[i + j*8];
+	    i += 1;
 	}
+	i = 0;
+	j += 1;
+    }
 }
 
-pub unsafe fn draw_cursor(width: u32, start: u32)
+pub unsafe fn draw_cursor()
 {
-	if (start + 4*(480*640)) <= (start + 4*(640*CURSOR_Y+CURSOR_X+2*CURSOR_WIDTH))
-	{
-	    scrollup(start);
-	}
-	
-	let mut i = 0;
-	let mut j = 0;
+    if (START_ADDR + 4*(SCREEN_HEIGHT*SCREEN_WIDTH)) <= (START_ADDR + 4*(SCREEN_WIDTH*CURSOR_Y+CURSOR_X+2*CURSOR_WIDTH))
+    {
+	scrollup();
+    }
 
-	while j < CURSOR_HEIGHT
+    let mut i = 0;
+    let mut j = 0;
+
+    while j < CURSOR_HEIGHT
+    {
+	while i < CURSOR_WIDTH
 	{
-		while i < CURSOR_WIDTH
-		{
-			let addr = start + 4*(CURSOR_X + i + width*(CURSOR_Y + j));
-			*(addr as *mut u32) = CURSOR_COLOR;
-			i += 1;
-		}
-		i = 0;
-		j += 1;
+	    let addr = START_ADDR + 4*(CURSOR_X + i + SCREEN_WIDTH*(CURSOR_Y + j));
+	    *(addr as *mut u32) = CURSOR_COLOR;
+	    i += 1;
 	}
-	
+	i = 0;
+	j += 1;
+    }
+
 }
 
-pub unsafe fn paint(color: u32, start: u32)
+pub unsafe fn paint(color: u32)
 {
-	let mut i = 0; 
-	while i < 640*480
-	{
-		*((start as u32 + i*4) as *mut u32) = color;
-		i+=1;
-	}
+    let mut i = 0; 
+    while i < SCREEN_WIDTH*SCREEN_HEIGHT
+    {
+	*((START_ADDR as u32 + i*4) as *mut u32) = color;
+	i+=1;
+    }
 }
 
-pub unsafe fn fill_bg(start: u32)
+pub unsafe fn fill_bg()
 {
-    paint(BG_COLOR, start);
+    paint(BG_COLOR);
 }
 
 pub unsafe fn read(addr: u32)	->	u32
 {
-	*(addr as *mut u32)
+    *(addr as *mut u32)
 }
 
 pub unsafe fn ws(addr: u32, value: u32)
 {
-	*(addr as *mut u32) = *(addr as *mut u32) | value;
+    *(addr as *mut u32) = *(addr as *mut u32) | value;
 }
 
 pub unsafe fn wh(addr: u32, value: u32)
 {
-	*(addr as *mut u32) = value;
+    *(addr as *mut u32) = value;
 }
 
 pub unsafe fn set_fg(color: u32)

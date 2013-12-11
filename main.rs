@@ -42,5 +42,5 @@ pub unsafe fn main() {
 	let table = cpu::interrupt::table::new();
 	table.load();
 	drivers::init(table);
-	io::init();
+	io::init(640, 480);
 }
