@@ -26,6 +26,23 @@ pub unsafe fn write_char(c: char, address: *mut u32) {
 	*address = c as u32;
 }
 
+pub unsafe fn scrollup(start: u32)
+{
+    let mut i = CURSOR_HEIGHT*640;
+    while i < (640*480)
+    {
+	*((start + ((i-16*640)*4)) as *mut u32) = *((start+(i*4)) as *u32); 
+	i += 1;
+    }
+    i = 4*(640*480 - CURSOR_HEIGHT*640);
+    while i < 4*640*480
+    {
+	*((start + (i as u32)) as *mut u32) = BG_COLOR;
+	i += 4;
+    }
+    CURSOR_X = 0x0u32;
+    CURSOR_Y -= CURSOR_HEIGHT;
+}
 pub unsafe fn draw_char(c: char, start: u32)
 {
 	let font_offset = (c as u8) - 0x20;
@@ -92,6 +109,11 @@ pub unsafe fn restore(width: u32, start: u32)
 
 pub unsafe fn draw_cursor(width: u32, start: u32)
 {
+	if (start + 4*(480*640)) <= (start + 4*(640*CURSOR_Y+CURSOR_X+2*CURSOR_WIDTH))
+	{
+	    scrollup(start);
+	}
+	
 	let mut i = 0;
 	let mut j = 0;
 

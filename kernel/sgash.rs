@@ -59,7 +59,7 @@ pub unsafe fn parsekey(x: char) {
 	// Key codes are printed backwards because life is hard
 		
 	if (true) {
-		match x {
+		match x { 
 			13		=>	{ 
 						io::CURSOR_Y += io::CURSOR_HEIGHT;
 						io::CURSOR_X = 0u32;
@@ -90,7 +90,8 @@ unsafe fn drawchar(x: char)
 {
     io::restore(640, 1024*1024);
     io::draw_char(x, 1024*1024);
-    io::CURSOR_X += io::CURSOR_WIDTH;	
+    io::CURSOR_X += io::CURSOR_WIDTH;
+    if io::CURSOR_X >= 640 {io::CURSOR_X -= 640; io::CURSOR_Y += io::CURSOR_HEIGHT}
     io::backup(640, 1024*1024);
     io::draw_cursor(640, 1024*1024);
 }
