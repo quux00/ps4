@@ -1,3 +1,5 @@
+/* Bitmap courtesy of cceckman */
+
 pub static bitmaps: [[u32, ..16], ..94] =
 [
 [
