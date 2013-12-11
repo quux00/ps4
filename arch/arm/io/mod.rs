@@ -15,7 +15,9 @@ pub static mut CURSOR_X: u32 = 0;
 pub static mut CURSOR_Y: u32 = 0;
 pub static CURSOR_HEIGHT: u32 = 16;
 pub static CURSOR_WIDTH: u32 = 8;
-pub static CURSOR_COLOR: u32 = 0x000000FF;
+pub static mut CURSOR_COLOR: u32 = 0x000000FF;
+pub static mut FG_COLOR: u32 = 0x00FFFFFF;
+pub static mut BG_COLOR: u32 = 0x00000000;
 pub static mut CURSOR_BUFFER: [u32, ..8*16] = [0x00FF0000, ..8*16];
 pub static mut SAVE_X: u32 = 0;
 pub static mut SAVE_Y: u32 = 0;
@@ -38,11 +40,11 @@ pub unsafe fn draw_char(c: char, start: u32)
 			let addr = start + 4*(CURSOR_X + CURSOR_WIDTH - i + 640*(CURSOR_Y + j));
 			if ((map[j] >> 4*i) & 1) == 1
 			{
-				*(addr as *mut u32) = CURSOR_COLOR;
+				*(addr as *mut u32) = FG_COLOR;
 			}
 			else
 			{
-				*(addr as *mut u32) = 0x00FF0000;
+				*(addr as *mut u32) = BG_COLOR;
 			}
 			i += 1;
 		}
@@ -117,6 +119,11 @@ pub unsafe fn paint(color: u32, start: u32)
 	}
 }
 
+pub unsafe fn fill_bg(start: u32)
+{
+    paint(BG_COLOR, start);
+}
+
 pub unsafe fn read(addr: u32)	->	u32
 {
 	*(addr as *mut u32)
@@ -130,4 +137,19 @@ pub unsafe fn ws(addr: u32, value: u32)
 pub unsafe fn wh(addr: u32, value: u32)
 {
 	*(addr as *mut u32) = value;
+}
+
+pub unsafe fn set_fg(color: u32)
+{
+    FG_COLOR = color;
+}
+
+pub unsafe fn set_bg(color: u32)
+{
+    BG_COLOR = color;
+}
+
+pub unsafe fn set_cursor_color(color: u32)
+{
+    CURSOR_COLOR = color;
 }
