@@ -70,7 +70,7 @@ pub unsafe fn parsekey(x: char) {
 					putchar('');
 					putchar(' ');
 					putchar(''); 
-					io::CURSOR_X -= io::CURSOR_WIDTH;	
+					backspace();
 				}
 			}
 			_		=>	{ 
@@ -91,6 +91,15 @@ unsafe fn drawchar(x: char)
     io::restore(640, 1024*1024);
     io::draw_char(x, 1024*1024);
     io::CURSOR_X += io::CURSOR_WIDTH;	
+    io::backup(640, 1024*1024);
+    io::draw_cursor(640, 1024*1024);
+}
+
+unsafe fn backspace()
+{
+    io::restore(640, 1024*1024);
+    io::CURSOR_X -= io::CURSOR_WIDTH;
+    io::draw_char(' ', 1024*1024);
     io::backup(640, 1024*1024);
     io::draw_cursor(640, 1024*1024);
 }
