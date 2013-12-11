@@ -42,35 +42,5 @@ pub unsafe fn main() {
 	let table = cpu::interrupt::table::new();
 	table.load();
 	drivers::init(table);
-	sgash::init(); 
-	/* For the following magic values, see 
-	 * http://infocenter.arm.com/help/index.jsp?topic=/com.arm.doc.dui0225d/CACHEDGD.html
-	 */
-/*
-	// 800x600
-	// See http://infocenter.arm.com/help/index.jsp?topic=/com.arm.doc.dui0225d/CACCCFBF.html
-	io::ws(0x10000010, 0x2CAC);
-	io::ws(0x10120000, 0x1313A4C4);
-	io::ws(0x10120004, 0x0505F657);
-	io::ws(0x10120008, 0x071F1800);
-*/
-	// 640x480
-	// See http://infocenter.arm.com/help/index.jsp?topic=/com.arm.doc.dui0225d/CACCCFBF.html
-	io::ws(0x10000010, 0x2C77);
-	io::ws(0x10120000, 0x3F1F3F9C);
-	io::ws(0x10120004, 0x090B61DF);
-	io::ws(0x10120008, 0x067F1800);
-
-	/* See http://forum.osdev.org/viewtopic.php?p=195000 */
-	io::ws(0x10120010, (1*1024*1024));
-
-	/* See http://infocenter.arm.com/help/index.jsp?topic=/com.arm.doc.ddi0161e/I911024.html */
-	io::ws(0x10120018, 0x82B);
-    
-	io::set_bg(0x222C38);
-	io::set_fg(0xFAFCFF);
-	io::set_cursor_color(0xFAFCFF);
-	io::fill_bg(1024*1024);	
-	sgash::drawstr(&"sgash > ");
-	io::draw_cursor(640, 1024*1024);
+	io::init();
 }

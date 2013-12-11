@@ -2,6 +2,7 @@
 
 use core::option::Some;
 use super::drivers;
+use kernel::sgash;
 
 mod font;
 
@@ -21,6 +22,41 @@ pub static mut BG_COLOR: u32 = 0x00000000;
 pub static mut CURSOR_BUFFER: [u32, ..8*16] = [0x00FF0000, ..8*16];
 pub static mut SAVE_X: u32 = 0;
 pub static mut SAVE_Y: u32 = 0;
+
+pub unsafe fn init()
+{
+	sgash::init();
+	/* For the following magic values, see 
+	 * http://infocenter.arm.com/help/index.jsp?topic=/com.arm.doc.dui0225d/CACHEDGD.html
+	 */
+/*
+	// 800x600
+	// See http://infocenter.arm.com/help/index.jsp?topic=/com.arm.doc.dui0225d/CACCCFBF.html
+	ws(0x10000010, 0x2CAC);
+	ws(0x10120000, 0x1313A4C4);
+	ws(0x10120004, 0x0505F657);
+	ws(0x10120008, 0x071F1800);
+*/
+	// 640x480
+	// See http://infocenter.arm.com/help/index.jsp?topic=/com.arm.doc.dui0225d/CACCCFBF.html
+	ws(0x10000010, 0x2C77);
+	ws(0x10120000, 0x3F1F3F9C);
+	ws(0x10120004, 0x090B61DF);
+	ws(0x10120008, 0x067F1800);
+
+	/* See http://forum.osdev.org/viewtopic.php?p=195000 */
+	ws(0x10120010, (1*1024*1024));
+
+	/* See http://infocenter.arm.com/help/index.jsp?topic=/com.arm.doc.ddi0161e/I911024.html */
+	ws(0x10120018, 0x82B);
+    
+	set_bg(0x222C38);
+	set_fg(0xFAFCFF);
+	set_cursor_color(0xFAFCFF);
+	fill_bg(1024*1024);	
+	sgash::drawstr(&"sgash > ");
+	draw_cursor(640, 1024*1024);
+}
 
 pub unsafe fn write_char(c: char, address: *mut u32) {
 	*address = c as u32;
