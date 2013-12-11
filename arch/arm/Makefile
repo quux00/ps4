@@ -18,7 +18,7 @@ LLCFLAGS := -march=arm -mcpu=arm926ej-s --float-abi=hard -asm-verbose
 GDB := $(GCC_PREFIX)gdb
 OBJCOPY := $(GCC_PREFIX)objcopy
 QEMU := qemu-system-arm
-QEMUFLAGS := -M versatilepb -m 32M 
+QEMUFLAGS := -M versatilepb -m 32M -serial stdio
 
 MODS := $(wildcard ../../*/*.rs) $(wildcard */*.rs)
 

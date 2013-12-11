@@ -16,6 +16,7 @@
 .global vectors
 .global vectors_end
 .global irq_handler
+.global k_font
 
 .type start, %function
 
