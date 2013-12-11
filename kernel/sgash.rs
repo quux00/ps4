@@ -32,6 +32,12 @@ fn putstr(msg: &str) {
     }
 }
 
+pub unsafe fn drawstr(msg: &str) {
+    for c in slice::iter(as_bytes(msg)) {
+	drawchar(*c as char);
+    }
+}
+
 pub unsafe fn putcstr(s: cstr)
 {
     let mut p = s.p as uint;
@@ -47,13 +53,12 @@ pub unsafe fn parsekey(x: char) {
 	// Set this to false to learn the keycodes of various keys!
 	// Key codes are printed backwards because life is hard
 		
-	io::restore(640, 1024*1024);
 	if (true) {
 		match x {
 			13		=>	{ 
-						prompt(); 
 						io::CURSOR_Y += io::CURSOR_HEIGHT;
 						io::CURSOR_X = 0u32;
+						prompt(false); 
 			}
 			127		=>	{ 
 				if (buffer.delete_char()) { 
@@ -65,18 +70,24 @@ pub unsafe fn parsekey(x: char) {
 			}
 			_		=>	{ 
 				if (buffer.add_char(x)) { 
-					putchar(x as char); 
-					io::draw_char(x as char, 1024*1024);
+					putchar(x as char);
+					drawchar(x as char);
 				}
-				io::CURSOR_X += io::CURSOR_WIDTH;	
 			}
 		}
-		io::backup(640, 1024*1024);
-		io::draw_cursor(640, 1024*1024);
 	}
 	else {
 		keycode(x);
 	}
+}
+
+unsafe fn drawchar(x: char)
+{
+    io::restore(640, 1024*1024);
+    io::draw_char(x, 1024*1024);
+    io::CURSOR_X += io::CURSOR_WIDTH;	
+    io::backup(640, 1024*1024);
+    io::draw_cursor(640, 1024*1024);
 }
 
 fn keycode(x: u8) {
@@ -90,10 +101,10 @@ fn keycode(x: u8) {
 
 pub unsafe fn init() {
 	buffer = cstr::new(256);
-	prompt();
+	prompt(true);
 }
 
-unsafe fn prompt() {
+unsafe fn prompt(startup: bool) {
 	/*
 	if (buffer.streq(&"ls")) { putstr( &"\na\tb") };
 	match buffer.getarg(' ', 0) {
@@ -112,6 +123,8 @@ unsafe fn prompt() {
 	};
 	*/
 	putstr(&"\nsgash > ");
+	if !startup {drawstr(&"sgash > ");}
+
 	buffer.reset();
 }
 
