@@ -57,7 +57,6 @@ pub unsafe fn main() {
 	// 640x480
 	// See http://infocenter.arm.com/help/index.jsp?topic=/com.arm.doc.dui0225d/CACCCFBF.html
 	io::ws(0x10000010, 0x2C77);
-
 	io::ws(0x10120000, 0x3F1F3F9C);
 	io::ws(0x10120004, 0x090B61DF);
 	io::ws(0x10120008, 0x067F1800);
@@ -71,4 +70,3 @@ pub unsafe fn main() {
 	io::paint(0x00FF0000, 1024*1024);
 	io::draw_cursor(640, 1024*1024);
 }
-
