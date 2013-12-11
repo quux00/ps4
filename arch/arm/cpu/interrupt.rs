@@ -27,9 +27,21 @@ impl table {
           mov sp, r2"
         ::: "r0", "r1", "r2", "cpsr");
 
+	/* 
+	 * See
+	 * http://infocenter.arm.com/help/index.jsp?topic=/com.arm.doc.dui0225d/I1042232.html
+	 * and pczarn's comment at 
+	 * https://github.com/wbthomason/ironkernel/commit/4b199b502b2fc5d42b7f1571b52dd1b0c657e77b#arch-arm-cpu-interrupt-rs-P6
+	 */
         *io::VIC_INTENABLE = 1 << 12;
+
+	/*
+	 * See
+	 * http://infocenter.arm.com/help/index.jsp?topic=/com.arm.doc.ddi0183f/I54603.html
+	 */
         *io::UART0_IMSC = 1 << 4;
 
+	// not sure what this is doing
         let mut i = 0;
         while i < 10 {
             *((i*4) as *mut u32) = vectors[i];
@@ -38,6 +50,7 @@ impl table {
     }
 }
 
+// not sure what this is
 extern {
     static vectors: [u32, ..10];
 }

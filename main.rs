@@ -43,23 +43,34 @@ pub unsafe fn main() {
 	table.load();
 	drivers::init(table);
 	sgash::init(); 
-	wtm(0x1000001C, 0x2CAC);
-	wtm(0x10120000, 0x1313A4C4);
-	wtm(0x10120004, 0x0505F657);
-	wtm(0x10120008, 0x071F1800);
-	wtm(0x10120010, (1*1024*1024));
-	wtm(0x10120018, 0x82B);
-	wtm(0x10008000, 0xF0F0F0F0);
-	/*let pl = (1024*1024) as *mut u32;
-	let mut i = 0; 
-	while i < 800*600
-	{
-		*((pl as u32 + i) as *mut u32) = 0x00FFFFFF;
-		i+=1;
-	}*/
-}
+	/* For the following magic values, see 
+	 * http://infocenter.arm.com/help/index.jsp?topic=/com.arm.doc.dui0225d/CACHEDGD.html
+	 */
+/*
+	// 800x600
+	// See http://infocenter.arm.com/help/index.jsp?topic=/com.arm.doc.dui0225d/CACCCFBF.html
+	io::ws(0x10000010, 0x2CAC);
+	io::ws(0x10120000, 0x1313A4C4);
+	io::ws(0x10120004, 0x0505F657);
+	io::ws(0x10120008, 0x071F1800);
+*/
+	// 640x480
+	// See http://infocenter.arm.com/help/index.jsp?topic=/com.arm.doc.dui0225d/CACCCFBF.html
+	io::ws(0x10000010, 0x2C77);
+	io::ws(0x10120000, 0x3F1F3F9C);
+	io::ws(0x10120004, 0x090B61DF);
+	io::ws(0x10120008, 0x067F1800);
 
-pub unsafe fn wtm(addr: u32, value: u32)
-{
-	*(addr as *mut u32) = value;
+	/* See http://forum.osdev.org/viewtopic.php?p=195000 */
+	io::ws(0x10120010, (1*1024*1024));
+
+	/* See http://infocenter.arm.com/help/index.jsp?topic=/com.arm.doc.ddi0161e/I911024.html */
+	io::ws(0x10120018, 0x82B);
+    
+	io::set_bg(0x222C38);
+	io::set_fg(0xFAFCFF);
+	io::set_cursor_color(0xFAFCFF);
+	io::fill_bg(1024*1024);	
+	sgash::drawstr(&"sgash > ");
+	io::draw_cursor(640, 1024*1024);
 }
