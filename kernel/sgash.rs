@@ -61,8 +61,7 @@ pub unsafe fn parsekey(x: char) {
 	if (true) {
 		match x { 
 			13		=>	{ 
-						io::CURSOR_Y += io::CURSOR_HEIGHT;
-						io::CURSOR_X = 0u32;
+						parse();
 						prompt(false); 
 			}
 			127		=>	{ 
@@ -88,6 +87,12 @@ pub unsafe fn parsekey(x: char) {
 
 unsafe fn drawchar(x: char)
 {
+	if x == '\n' {
+		io::CURSOR_Y += io::CURSOR_HEIGHT;
+		io::CURSOR_X = 0u32;
+		return;
+	}
+
     io::restore();
     io::draw_char(x);
     io::CURSOR_X += io::CURSOR_WIDTH;
@@ -107,7 +112,7 @@ unsafe fn backspace()
 
 fn keycode(x: u8) {
 	let mut x = x;
-	while ( x != 0 ) {
+	while  x != 0 {
 		putchar((x%10+ ('0' as u8) ) as char);
 		x = x/10;
 	}
@@ -166,26 +171,17 @@ pub unsafe fn init() {
 }
 
 unsafe fn prompt(startup: bool) {
-	/*
-	if (buffer.streq(&"ls")) { putstr( &"\na\tb") };
-	match buffer.getarg(' ', 0) {
-	Some(y)	=> {
-	if(y.streq(&"cat")) { 
-	match buffer.getarg(' ', 1) {
-	Some(x)	=> {
-	if(x.streq(&"a")) { putstr( &"\nHello"); }
-	if(x.streq(&"b")) { putstr( &"\nworld!"); }
-	}
-	None	=> { }
-	};
-	}
-	}
-	None	=> { }
-	};
-	*/
 	putstr(&"\nsgash > ");
-	if !startup {drawstr(&"sgash > ");}
+	if !startup {drawstr(&"\nsgash > ");}
 
+	buffer.reset();
+}
+
+unsafe fn parse() {
+	if buffer.streq(&"open") {
+		putstr(&"\nTEST YO");
+		drawstr(&"\nTEST YO");
+	}
 	buffer.reset();
 }
 
@@ -249,7 +245,7 @@ impl cstr {
 			let mut x = 0;
 			let mut selfp: uint = self.p as uint;
 			let mut otherp: uint = other.p as uint;
-			while (x < self.len()) {
+			while x < self.len() {
 				if (*(selfp as *char) != *(otherp as *char)) { return false; }
 				selfp += 1;
 				otherp += 1;
