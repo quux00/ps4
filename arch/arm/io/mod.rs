@@ -127,8 +127,7 @@ pub unsafe fn draw_char(c: char)
 	    addr-= 4;
 	    i += 1;
 	}
-	addr += 4*(i);
-	addr += 4*SCREEN_WIDTH;
+	addr += 4*(i+SCREEN_WIDTH);
 	i = 0;
 	j += 1;
     }
