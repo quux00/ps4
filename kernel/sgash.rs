@@ -178,10 +178,34 @@ unsafe fn prompt(startup: bool) {
 }
 
 unsafe fn parse() {
-	if buffer.streq(&"open") {
-		putstr(&"\nTEST YO");
-		drawstr(&"\nTEST YO");
-	}
+	if (buffer.streq(&"ls")) { 
+	    putstr( &"\na\tb") ;
+	    drawstr( &"\na    b") ;
+	};
+	match buffer.getarg(' ', 0) {
+	    Some(y)        => {
+		if(y.streq(&"cat")) {
+		    match buffer.getarg(' ', 1) {
+			Some(x)        => {
+			    if(x.streq(&"a")) { 
+				putstr( &"\nHello"); 
+				drawstr( &"\nHello"); 
+			    }
+			    if(x.streq(&"b")) {
+				putstr( &"\nworld!");
+				drawstr( &"\nworld!");
+			    }
+			}
+			None        => { }
+		    };
+		}
+		if(y.streq(&"open")) {
+		    putstr(&"\nTEST YO");
+		    drawstr(&"\nTEST YO");
+		}
+	    }
+	    None        => { }
+	};
 	buffer.reset();
 }
 
