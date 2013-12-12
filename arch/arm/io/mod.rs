@@ -111,7 +111,6 @@ pub unsafe fn draw_char(c: char)
     let mut addr = START_ADDR + 4*(CURSOR_X + CURSOR_WIDTH + 1 + SCREEN_WIDTH*CURSOR_Y);
     while j < CURSOR_HEIGHT
     {
-	let a = addr;
 	while i < CURSOR_WIDTH
 	{
 	    //let addr = START_ADDR + 4*(CURSOR_X + CURSOR_WIDTH - i + SCREEN_WIDTH*(CURSOR_Y + j));
@@ -128,7 +127,7 @@ pub unsafe fn draw_char(c: char)
 	    addr-= 4;
 	    i += 1;
 	}
-	addr = a;
+	addr += 4*(i);
 	addr += 4*SCREEN_WIDTH;
 	i = 0;
 	j += 1;
