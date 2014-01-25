@@ -1,16 +1,12 @@
-RUST_ROOT := /usr/
-LLVM_ROOT := /usr
-GCC_PREFIX := /usr/bin/arm-none-eabi-
-
 TARGET := arm-linux-noeabi
 
--include ./config.mk
+GCC_PREFIX := $(GCC_PREFIX)arm-none-eabi-
 
 RUSTC := $(RUST_ROOT)/bin/rustc
-RUSTCFLAGS := -O --target $(TARGET) --lib -S --emit-llvm
+RUSTCFLAGS := -O --target $(TARGET) -Z no-landing-pads -Z debug-info -Z extra-debug-info
 
-CC := $(GCC_PREFIX)gcc
-CFLAGS := -g -ffreestanding -nostdlib -O3 -Wall
+AS := $(GCC_PREFIX)as
+LD := $(GCC_PREFIX)ld
 
 LLC := $(LLVM_ROOT)/bin/llc
 LLCFLAGS := -march=arm -mcpu=arm926ej-s --float-abi=hard -asm-verbose
@@ -20,39 +16,64 @@ OBJCOPY := $(GCC_PREFIX)objcopy
 QEMU := qemu-system-arm
 QEMUFLAGS := -M versatilepb -m 32M -serial stdio
 
-MODS := $(wildcard ../../*/*.rs) $(wildcard */*.rs)
+BDIR := ./boot
+CORE_LIB := ../../rust-core/core/lib.rs
+LCORE := $(BDIR)/$(shell $(RUSTC) --crate-file-name $(CORE_LIB))
+OBJS := $(BDIR)/loader.o $(BDIR)/aeabi_runtime.o $(BDIR)/main.o $(BDIR)/core.o
+LINK := $(BDIR)/linker.ld $(OBJS)
 
-all: boot/floppy.img
+MODS := $(wildcard */*.rs) $(wildcard ../../kernel/*.rs) $(wildcard ../../kernel/*/*.rs) $(wildcard ../../kernel/*/*/*.rs)
 
-.PHONY: run debug
+-include ./config.mk
+-include $(BDIR)/core.d
+-include $(BDIR)/loader.d
 
-.DELETE_ON_ERROR:
+.PHONY: all run debug clean
 
-%.ll: ../../../%.rs $(MODS)
-	cd ../..; $(RUSTC) $(RUSTCFLAGS) main.rs -o arch/arm/$*.ll
-	sed -i 's/fixedstacksegment //g' $@
-	sed -i 's/arm-unknown-linux-gnueabihf/arm-none-eabi/g' $@
-	sed -i 's/nocapture read[a-z]*/nocapture/g' $@
+all: $(BDIR)/kernel.bin
+	@wc -c $^
 
-%.s: %.ll
+# Library rust-core
+$(LCORE):
+	$(RUSTC) $(RUSTCFLAGS) --dep-info $(@D)/core.d $(CORE_LIB) --out-dir $(BDIR)
+
+$(BDIR)/core.bc: $(LCORE)
+	cd $(@D); ar -x $(<F) $(@F)
+
+# Compile rustboot
+$(BDIR)/main.bc: ../../lib.rs $(MODS) $(LCORE)
+	$(RUSTC) $(RUSTCFLAGS) --dep-info $(@D)/main.d -L $(BDIR) --emit-llvm ../../lib.rs --out-dir $(BDIR)
+
+%.s: %.bc
 	$(LLC) $(LLCFLAGS) $^ -o $@
-	sed -i 's/.note.rustc,"aw"/.note.rustc,"a"/g' $@
 
 %.o: %.s
-	$(CC) -c $< -o $@
+	$(AS) -MD $*.d -g $< -o $@
 
-boot/floppy.elf: boot/linker.ld boot/loader.o boot/main.o
-	$(CC) $(CFLAGS) -o $@ -T $^
+# kernel (object)
+$(BDIR)/kernel.elf: $(LINK)
+	$(LD) -o $@ -T $^
 
-boot/floppy.img: boot/floppy.elf
+# kernel (binary image)
+$(BDIR)/kernel.bin: $(BDIR)/kernel.elf
 	$(OBJCOPY) -O binary $^ $@
 
-run: boot/floppy.img
+# running
+run: $(BDIR)/kernel.bin
 	$(QEMU) $(QEMUFLAGS) -kernel $^
 
-debug: boot/floppy.img
+debug: $(BDIR)/kernel.elf
+ifeq ($(strip $(TMUX)),)
 	tmux new-session -d -s rustboot
 	tmux new-window -t rustboot:1 "$(QEMU) $(QEMUFLAGS) -kernel $^ -s -S"
-	tmux split-window -t rustboot "$(GDB) -ex 'target remote localhost:1234' -ex 'symbol-file floppy.elf'"
+	tmux split-window -t rustboot "$(GDB)"
 	tmux a -t rustboot
 	tmux kill-session -t rustboot
+else
+	# TODO: debug in current window, can't kill panes
+	tmux new-w "$(QEMU) -M versatilepb -m 32M -nographic -kernel $^ -s -S"
+	tmux split-w "$(GDB); tmux kill-w"
+endif
+
+clean:
+	rm -f $(BDIR)/*.{d,o,bc,rlib,so,ll,embed,elf,bin}

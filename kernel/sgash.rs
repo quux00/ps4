@@ -4,10 +4,9 @@ use core::*;
 use core::str::*;
 use core::option::{Some, Option, None}; // Match statement
 use core::iter::Iterator;
-use core::vec::Vec;
-use core::mem::Allocator;
 use kernel::*;
 use super::super::platform::*;
+use kernel::memory::Allocator;
 
 pub static mut buffer: cstr = cstr {
 				p: 0 as *mut u8,
@@ -25,7 +24,6 @@ pub fn putchar(key: char) {
     }
 }
 
-#[lang = "exchange_free"]
 fn putstr(msg: &str) {
     for c in slice::iter(as_bytes(msg)) {
 	putchar(*c as char);
@@ -220,7 +218,7 @@ struct cstr {
 impl cstr {
 	pub unsafe fn new(size: uint) -> cstr {
 		// Sometimes this doesn't allocate enough memory and gets stuck...
-		let (x, y) = memory::allocator.alloc(size);
+		let (x, y) = heap.alloc(size);
 		let this = cstr {
 			p: x,
 			p_cstr_i: 0,
@@ -241,7 +239,8 @@ impl cstr {
 	fn len(&self) -> uint { self.p_cstr_i }
 
 	// HELP THIS DOESN'T WORK THERE IS NO GARBAGE COLLECTION!!!
-	unsafe fn destroy(&self) { memory::allocator.free(self.p); }
+	// -- TODO: exchange_malloc, exchange_free
+	unsafe fn destroy(&self) { heap.free(self.p); }
 
 	unsafe fn add_char(&mut self, x: u8) -> bool{
 		if (self.p_cstr_i == self.max) { return false; }

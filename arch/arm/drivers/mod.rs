@@ -3,11 +3,15 @@
 use super::cpu::interrupt;
 use super::io;
 use core::option::{Option, None};
-use core::vec;
+use kernel;
 
-pub unsafe fn init(table: interrupt::table) {
+pub fn init() {
+    unsafe {
+        kernel::int_table.map(|t| {
 	// See http://infocenter.arm.com/help/index.jsp?topic=/com.arm.doc.dai0235c/index.html
-	table.enable(6, keypress as u32);
+            t.enable(interrupt::IRQ, keypress as u32);
+        });
+    }
 }
 
 pub static mut keydown: Option<extern unsafe fn(char)> = None;
