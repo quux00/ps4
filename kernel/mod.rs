@@ -28,11 +28,11 @@ pub static mut page_dir: Option<*mut PageDirectory> = None;
 #[no_mangle]
 pub fn main() {
     memory::BuddyAlloc::new(0x110_000 as *mut u8, 17, memory::Bitv { storage: 0x100_000 as memory::BitvStorage });
-    cpu::init();
     let table = interrupt::Table::new();
     unsafe {
         int_table = Some(table);
     }
+    cpu::init();
 
     table.load();
     drivers::init();
@@ -43,7 +43,8 @@ pub fn main() {
 }
 
 #[lang = "exchange_malloc"]
-pub unsafe fn malloc(size: uint) -> *mut u8 {
+#[inline]
+pub unsafe fn malloc_raw(size: uint) -> *mut u8 {
     if size == 0 {
         0 as *mut u8
     }
@@ -57,6 +58,35 @@ pub unsafe fn malloc(size: uint) -> *mut u8 {
 }
 
 #[lang = "exchange_free"]
+#[inline]
 pub unsafe fn free(ptr: *mut u8) {
     heap.free(ptr);
+}
+
+#[inline]
+pub unsafe fn zero_alloc(size: uint) -> *mut u8 {
+    if size == 0 {
+        0 as *mut u8
+    }
+    else {
+        let (ptr, sz) = heap.zero_alloc(size);
+        if sz == 0 {
+            out_of_memory();
+        }
+        ptr
+    }
+}
+
+#[inline]
+pub unsafe fn realloc_raw(ptr: *mut u8, size: uint) -> *mut u8 {
+    if size == 0 {
+        free(ptr);
+        0 as *mut u8
+    } else {
+        let (ptr, sz) = heap.realloc(ptr, size);
+        if sz == 0 {
+            out_of_memory()
+        }
+        ptr
+    }
 }
