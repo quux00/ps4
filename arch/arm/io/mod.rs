@@ -1,6 +1,7 @@
 /* io::mod.rs */
 
 use core::option::Some;
+use core::mem::volatile_store;
 use super::drivers;
 use kernel::sgash;
 
@@ -77,7 +78,7 @@ pub unsafe fn init(width: u32, height: u32)
 }
 
 pub unsafe fn write_char(c: char, address: *mut u32) {
-    *address = c as u32;
+    volatile_store(address, c as u32);
 }
 
 pub unsafe fn scrollup()

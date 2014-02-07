@@ -1,25 +1,38 @@
 ironkernel
 --------
-![](http://i.imgur.com/9nE81nY.png)
+![][img]
 
-A fork of [rustboot](https://github.com/pczarn/rustboot) focusing on the ARM functionality and aiming to extend it into a more fully functional kernel. Setup instructions below cribbed also from [rustboot](https://github.com/pczarn/rustboot).
+A fork of [rustboot] focusing on the ARM functionality and aiming to extend it into a more fully functional kernel. Setup instructions below cribbed also from [rustboot](https://github.com/pczarn/rustboot).
 
 ## Setup
 
 You need a few things to run ironkernel:
 
-1. `qemu`
-2. `nasm`
-3. Rust's `master` branch
-4. a cross-compiler for i386
-5. optionally, tools for arm-none-eabi
-6. rust-core
+1. [rust-core]
+2. [Rust's `master` branch][rust] or 0.9 release
+3. qemu
+4. llvm
+5. binutils for arm-none-eabi
+6. Optionally for debugging
+  * gdb
+  * tmux
+
+Clone this repository and update rust-core.
+
+```bash
+$ git clone https://github.com/wbthomason/ironkernel.git
+$ cd ironkernel
+$ git submodule update --init
+### you can also pull latest rust-core:
+$ git submodule foreach git pull origin master
+```
 
 ### Arch Linux
 
 Simply install all dependencies:
 ```
-# pacman -S qemu nasm rust
+# pacman -S qemu rust llvm tmux
+# yaourt -S gcc-arm-none-eabi
 ```
 
 ### OSX
@@ -30,13 +43,13 @@ Install `nasm` and `qemu` from homebrew:
 
 ```bash
 $ brew install nasm
-$ brew install quemu
+$ brew install qemu
 ```
 ### Everyone
 Install binutils from source.
 
 ```bash
-$ wget 'ftp://sourceware.org/pub/binutils/snapshots/binutils-2.23.52.tar.bz2' # or latest binutils
+$ wget 'ftp://sourceware.org/pub/binutils/snapshots/binutils.tar.bz2'
 $ ./configure --target=i386-elf 
 $ make && make install
 ```
@@ -49,13 +62,7 @@ $ cd rust
 $ ./configure
 $ make && make install
 ```
-To get rust-core, grab it from git:
 
-```bash
-# In your ironkernel dir:
-$ git clone https://github.com/thestinger/rust-core.git
-$ cd rust-core
-```
 ## Running it
 You may have to make some small changes before it builds. 
 Namely, you may need to adjust the rust prefix in the makefile (I did). Hopefully nothing else.
@@ -66,3 +73,8 @@ To run, use:
 $ make run	# emulate default platform (ARM)
 $ make debug # debug on arm
 ```
+
+[rust-core]: https://github.com/thestinger/rust-core
+[rustboot]: https://github.com/pczarn/rustboot
+[rust]: https://github.com/mozilla/rust
+[img]: http://i.imgur.com/9nE81nY.png
