@@ -9,7 +9,7 @@ pub fn init() {
     unsafe {
         kernel::int_table.map(|t| {
 	// See http://infocenter.arm.com/help/index.jsp?topic=/com.arm.doc.dai0235c/index.html
-            t.enable(interrupt::IRQ, keypress as u32);
+            t.enable(interrupt::IRQ, keypress);
         });
     }
 }
@@ -24,6 +24,8 @@ pub unsafe fn keypress() {
 		f(x)
 	}
 	);
-	asm!("pop {r11, lr}
-	  subs pc, lr, #4");
+    // Exception return instruction. [8]
+    // TODO: better interrupt handler. r11 could change
+    asm!("pop {r11, lr}
+          subs pc, r14, #4") // pc = lr - 4
 }

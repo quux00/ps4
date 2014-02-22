@@ -1,10 +1,10 @@
-use core::fail::{abort, out_of_memory};
-use core::ptr::offset;
-use core::ptr::{set_memory, copy_memory};
+use core::mem::transmute;
+use core::ptr::{set_memory, copy_memory, offset};
 use core::i32::ctlz32;
 
 use kernel::ptr::mut_offset;
 
+#[repr(u8)]
 enum Node {
     UNUSED = 0,
     USED = 1,
@@ -13,10 +13,22 @@ enum Node {
 }
 
 pub trait Allocator {
-    unsafe fn alloc(&mut self, size: uint) -> (*mut u8, uint);
-    unsafe fn zero_alloc(&mut self, size: uint) -> (*mut u8, uint);
-    unsafe fn realloc(&mut self, ptr: *mut u8, size: uint) -> (*mut u8, uint);
-    unsafe fn free(&mut self, ptr: *mut u8);
+    fn alloc(&mut self, size: uint) -> (*mut u8, uint);
+
+    fn zero_alloc(&mut self, s: uint) -> (*mut u8, uint) {
+        let (ptr, size) = self.alloc(s);
+        unsafe { set_memory(ptr, 0, size); }
+        (ptr, size)
+    }
+
+    fn realloc(&mut self, src: *mut u8, size: uint) -> (*mut u8, uint) {
+        self.free(src);
+        let (ptr, sz) = self.alloc(size);
+        unsafe { copy_memory(ptr, src as *u8, sz); }
+        (ptr, sz)
+    }
+
+    fn free(&mut self, ptr: *mut u8);
 }
 
 trait BitvTrait {
@@ -39,7 +51,7 @@ impl BitvTrait for Bitv {
     fn get(&self, i: uint) -> Node {
         let w = i / 16;
         let b = (i % 16) * 2;
-        unsafe { [UNUSED, USED, SPLIT, FULL][((*self.storage)[w] as uint >> b) & 3] }
+        unsafe { transmute(((*self.storage)[w] as uint >> b) as u8 & 3) }
     }
 
     #[inline]
@@ -61,28 +73,31 @@ impl BitvTrait for Bitv {
 }
 
 pub struct BuddyAlloc {
-    base: *mut u8,
     order: uint,
     tree: Bitv
 }
 
+pub struct Alloc {
+    parent: BuddyAlloc,
+    base: *mut u8,
+    el_size: uint
+}
+
 impl BuddyAlloc {
-    pub fn new(base: *mut u8, order: uint, storage: Bitv) -> BuddyAlloc {
+    pub fn new(order: uint, storage: Bitv) -> BuddyAlloc {
         unsafe { set_memory(storage.to_bytes(), 0, storage.size()); }
 
-        BuddyAlloc { base: base, order: order, tree: storage }
+        BuddyAlloc { order: order, tree: storage }
     }
 
     #[inline]
-    fn offset(&self, index: uint, level: uint) -> *mut u8 {
+    fn offset(&self, index: uint, level: uint) -> uint {
         unsafe {
-            mut_offset(self.base, (index + 1 - (1 << (self.order - level))) as int << level)
+            (index + 1 - (1 << (self.order - level))) << level
         }
     }
-}
 
-impl Allocator for BuddyAlloc {
-    fn alloc(&mut self, mut size: uint) -> (*mut u8, uint) {
+    fn alloc(&mut self, mut size: uint) -> (uint, uint) {
         if size == 0 {
             size = 1;
         }
@@ -140,7 +155,7 @@ impl Allocator for BuddyAlloc {
 
                     if index == 0 {
                         // out of memory -- back at tree's root after traversal
-                        return (self.base, 0);
+                        return (0, 0);
                     }
 
                     index = (index + 1) / 2 - 1; // parent
@@ -149,28 +164,10 @@ impl Allocator for BuddyAlloc {
         }
     }
 
-    fn zero_alloc(&mut self, s: uint) -> (*mut u8, uint) {
-        let (ptr, size) = self.alloc(s);
-        unsafe { set_memory(ptr, 0, size); }
-        (ptr, size)
-    }
-
-    fn realloc(&mut self, src: *mut u8, size: uint) -> (*mut u8, uint) {
-        self.free(src);
-        let (ptr, sz) = self.alloc(size);
-        unsafe { copy_memory(ptr, src as *u8, sz); }
-        (ptr, sz)
-    }
-
-    fn free(&mut self, ptr: *mut u8) {
+    fn free(&mut self, offset: uint) {
         let mut length = 1 << self.order;
         let mut left = 0;
         let mut index = 0;
-
-        if ((ptr as uint) < self.base as uint) || (ptr as uint >= self.base as uint + length) {
-            return;
-        }
-        let offset = ptr as uint - self.base as uint;
 
         loop {
             match self.tree.get(index) {
@@ -212,5 +209,30 @@ impl Allocator for BuddyAlloc {
                 }
             }
         }
+    }
+}
+
+impl Allocator for Alloc {
+    fn alloc(&mut self, mut size: uint) -> (*mut u8, uint) {
+        let (offset, size) = self.parent.alloc(size);
+        unsafe {
+            return (
+                mut_offset(self.base, (offset << self.el_size) as int),
+                size << self.el_size
+            )
+        }
+    }
+
+    fn free(&mut self, ptr: *mut u8) {
+        let mut length = 1 << self.parent.order << self.el_size;
+
+        unsafe {
+            if ptr < self.base || ptr >= mut_offset(self.base, length) {
+                return;
+            }
+        }
+
+        let offset = (ptr as uint - self.base as uint) >> self.el_size;
+        self.parent.free(offset);
     }
 }
