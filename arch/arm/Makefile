@@ -1,3 +1,5 @@
+SHELL=/bin/bash
+
 TARGET := arm-linux-noeabi
 
 GCC_PREFIX := $(GCC_PREFIX)arm-none-eabi-
@@ -7,6 +9,7 @@ RUSTCFLAGS := -O --target $(TARGET) -Z no-landing-pads -Z debug-info -Z extra-de
 
 AS := $(GCC_PREFIX)as
 LD := $(GCC_PREFIX)ld
+
 
 LLC := $(LLVM_ROOT)/bin/llc
 LLCFLAGS := -march=arm -mcpu=arm926ej-s --float-abi=hard -asm-verbose
@@ -21,6 +24,8 @@ CORE_LIB := ../../rust-core/core/lib.rs
 LCORE := $(BDIR)/$(shell $(RUSTC) --crate-file-name $(CORE_LIB))
 OBJS := $(BDIR)/loader.o $(BDIR)/aeabi_runtime.o $(BDIR)/main.o $(BDIR)/core.o
 LINK := $(BDIR)/linker.ld $(OBJS)
+MAP := $(BDIR)/kernel.map
+LIST := $(BDIR)/kernel.list
 
 MODS := $(wildcard */*.rs) $(wildcard ../../kernel/*.rs) $(wildcard ../../kernel/*/*.rs) $(wildcard ../../kernel/*/*/*.rs)
 
@@ -30,7 +35,7 @@ MODS := $(wildcard */*.rs) $(wildcard ../../kernel/*.rs) $(wildcard ../../kernel
 
 .PHONY: all run debug clean
 
-all: $(BDIR)/kernel.bin
+all: $(BDIR)/kernel.bin $(LIST)
 	@wc -c $^
 
 # Library rust-core
@@ -50,13 +55,18 @@ $(BDIR)/main.bc: ../../lib.rs $(MODS) $(LCORE)
 %.o: %.s
 	$(AS) -MD $*.d -g $< -o $@
 
-# kernel (object)
+# kernel (object) and kernel map
 $(BDIR)/kernel.elf: $(LINK)
 	$(LD) -o $@ -T $^
 
 # kernel (binary image)
 $(BDIR)/kernel.bin: $(BDIR)/kernel.elf
 	$(OBJCOPY) -O binary $^ $@
+
+# kernel listing
+$(LIST): $(BDIR)/kernel.elf
+	$(LD) --version > $(LIST)
+# $(GCC_PREFIX)objdump -D $(BDIR)/kernel.elf > $(LIST)
 
 # running
 run: $(BDIR)/kernel.bin
@@ -76,4 +86,6 @@ else
 endif
 
 clean:
-	rm -f $(BDIR)/*.{d,o,bc,rlib,so,ll,embed,elf,bin}
+	rm -f $(BDIR)/*.{d,o,bc,rlib,so,ll,embed,elf,bin,list,map}
+
+
