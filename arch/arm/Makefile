@@ -1,3 +1,4 @@
+SHELL=/bin/bash
 TARGET := arm-linux-noeabi
 
 GCC_PREFIX := $(GCC_PREFIX)arm-none-eabi-
