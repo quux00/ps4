@@ -2,7 +2,7 @@ ironkernel
 --------
 ![][img]
 
-A fork of [rustboot] focusing on the ARM functionality and aiming to extend it into a more fully functional kernel. Setup instructions below cribbed also from [rustboot](https://github.com/pczarn/rustboot).
+A fork of [rustboot] focusing on ARM functionality and aiming to extend it into a more fully functional kernel. Setup instructions below cribbed also from [rustboot](https://github.com/pczarn/rustboot).
 
 ## Setup
 
@@ -34,7 +34,7 @@ Simply install all dependencies:
 # pacman -S base-devel qemu rust llvm tmux
 # yaourt -S arm-none-eabi-gcc
 ```
-
+Note that you will want Rust 0.9 and LLVM 3.4
 ### OSX
 
 To set things up on OSX, do this:
