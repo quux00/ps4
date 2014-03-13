@@ -49,9 +49,12 @@ $ brew install qemu
 Install binutils from source.
 
 ```bash
-$ wget 'ftp://sourceware.org/pub/binutils/snapshots/binutils.tar.bz2'
-$ ./configure --target=i386-elf 
-$ make && make install
+wget ftp://ftp.gnu.org/gnu/binutils/binutils-2.23.2.tar.gz
+tar xzvf binutils-2.23.2.tar.gz
+cd binutils-2.23.2
+export ARMTOOLS=~/arm-none-eabi
+./configure --target=arm-none-eabi --prefix=$ARMTOOLS
+make all install
 ```
 
 To get edge Rust going, grab it from git:
