@@ -31,7 +31,7 @@ $ git submodule foreach git pull origin master
 
 Simply install all dependencies:
 ```
-# pacman -S qemu rust llvm tmux
+# pacman -S base-devel qemu rust llvm tmux
 # yaourt -S arm-none-eabi-gcc
 ```
 
