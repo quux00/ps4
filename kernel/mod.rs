@@ -4,7 +4,6 @@ use core::fail::out_of_memory;
 use platform::{cpu, io, drivers};
 use cpu::interrupt;
 
-use self::memory::virtual::PageDirectory;
 use self::memory::Allocator;
 
 pub mod int;

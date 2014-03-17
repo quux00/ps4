@@ -1,3 +1,6 @@
+#[allow(unused_imports)];
+#[allow(dead_code)];
+
 use core::mem::size_of;
 use core::ptr::set_memory;
 use core::option::Some;
@@ -33,6 +36,7 @@ pub unsafe fn init() {
     (*dir).enable();
 }
 
+#[allow(unused_variable)]
 pub unsafe fn map(page_ptr: *mut u8, flags: u32) {
     // TODO
 }

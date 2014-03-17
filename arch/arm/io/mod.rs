@@ -1,8 +1,6 @@
 /* io::mod.rs */
 
-use core::option::Some;
 use core::mem::volatile_store;
-use super::drivers;
 use kernel::sgash;
 
 mod font;
@@ -11,6 +9,7 @@ mod font;
 pub static UART0: *mut u32 = 0x101f1000 as *mut u32;
 
 pub static UART0_IMSC: *mut u32 = (0x101f1000 + 0x038) as *mut u32;
+#[allow(dead_code)]
 pub static VIC_INTENABLE: *mut u32 = (0x10140000 + 0x010) as *mut u32;
 
 pub static mut CURSOR_X: u32 = 0;
@@ -19,7 +18,7 @@ pub static CURSOR_HEIGHT: u32 = 16;
 pub static CURSOR_WIDTH: u32 = 8;
 pub static mut CURSOR_COLOR: u32 = 0x000000FF;
 pub static mut FG_COLOR: u32 = 0x00FFFFFF;
-pub static mut BG_COLOR: u32 = 0x00000000;
+pub static mut BG_COLOR: u32 = 0xF0000000;
 pub static mut CURSOR_BUFFER: [u32, ..8*16] = [0x00FF0000, ..8*16];
 pub static mut SAVE_X: u32 = 0;
 pub static mut SAVE_Y: u32 = 0;
@@ -206,6 +205,7 @@ pub unsafe fn fill_bg()
     paint(BG_COLOR);
 }
 
+#[allow(dead_code)]
 pub unsafe fn read(addr: u32)	->	u32
 {
     *(addr as *mut u32)
@@ -216,6 +216,7 @@ pub unsafe fn ws(addr: u32, value: u32)
     *(addr as *mut u32) = *(addr as *mut u32) | value;
 }
 
+#[allow(dead_code)]
 pub unsafe fn wh(addr: u32, value: u32)
 {
     *(addr as *mut u32) = value;

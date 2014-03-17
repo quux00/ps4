@@ -31,7 +31,7 @@ fn putstr(msg: &str) {
 }
 
 pub unsafe fn drawstr(msg: &str) {
-    let mut old_fg = super::super::io::FG_COLOR;
+    let old_fg = super::super::io::FG_COLOR;
     let mut x: u32 = 0x6699AAFF;
     for c in slice::iter(as_bytes(msg)) {
 	x = (x << 8) + (x >> 24); 
@@ -186,8 +186,8 @@ unsafe fn parse() {
 		    match buffer.getarg(' ', 1) {
 			Some(x)        => {
 			    if(x.streq(&"a")) { 
-				putstr( &"\nHello"); 
-				drawstr( &"\nHello"); 
+				putstr( &"\nHowdy!"); 
+				drawstr( &"\nHowdy!"); 
 			    }
 			    if(x.streq(&"b")) {
 				putstr( &"\nworld!");
@@ -228,6 +228,7 @@ impl cstr {
 		this
 	}
 
+#[allow(dead_code)]
 	unsafe fn from_str(s: &str) -> cstr {
 		let mut this = cstr::new(256);
 		for c in slice::iter(as_bytes(s)) {
@@ -236,10 +237,12 @@ impl cstr {
 		this
 	}
 
+#[allow(dead_code)]
 	fn len(&self) -> uint { self.p_cstr_i }
 
 	// HELP THIS DOESN'T WORK THERE IS NO GARBAGE COLLECTION!!!
 	// -- TODO: exchange_malloc, exchange_free
+#[allow(dead_code)]
 	unsafe fn destroy(&self) { heap.free(self.p); }
 
 	unsafe fn add_char(&mut self, x: u8) -> bool{
@@ -262,6 +265,7 @@ impl cstr {
 		*(self.p as *mut char) = '\0';
 	}
 
+#[allow(dead_code)]
 	unsafe fn eq(&self, other: &cstr) -> bool {
 		if (self.len() != other.len()) { return false; }
 		else {
@@ -279,7 +283,6 @@ impl cstr {
 	}
 
 	unsafe fn streq(&self, other: &str) -> bool {
-		let mut x = 0;
 		let mut selfp: uint = self.p as uint;
 		for c in slice::iter(as_bytes(other)) {
 			if( *c != *(selfp as *u8) ) { return false; }
@@ -316,6 +319,7 @@ impl cstr {
 		}
 	}
 
+#[allow(dead_code)]
 	unsafe fn split(&self, delim: char) -> (cstr, cstr) {
 		let mut selfp: uint = self.p as uint;
 		let mut beg = cstr::new(256);
